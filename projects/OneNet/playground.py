@@ -13,8 +13,19 @@ import os
 import itertools
 import time
 from typing import Any, Dict, List, Set
+from torchinfo import summary
 
 import torch
+from detectron2.structures import (
+    BitMasks,
+    Boxes,
+    BoxMode,
+    Instances,
+    Keypoints,
+    PolygonMasks,
+    RotatedBoxes,
+    polygons_to_bitmask,
+)
 
 import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
@@ -107,6 +118,7 @@ def setup():
     add_onenet_config(cfg)
     cfg.merge_from_file("/Users/francescozuppichini/Documents/OneNet/projects/OneNet/configs/onenet.fcos.res50.yaml")
     cfg.MODEL.DEVICE = "cpu"
+    cfg.MODEL.OneNet.PRE_DEFINE = False
     # cfg.merge_from_list(args.opts)
     cfg.freeze()
     # default_setup(cfg, args)
@@ -118,14 +130,30 @@ def main():
     model = Trainer.build_model(cfg)
     images = torch.randn((1, 3, 640, 640))
     # outs = model.backbone(images)
+    target = Instances((640, 640))
+    target.gt_boxes = Boxes(torch.tensor([[10, 200, 300, 500]]))
+    classes = torch.tensor([1], dtype=torch.int64)
+    target.gt_classes = classes
+
     batched_inputs = [
         {
-            'image': torch.randn((3, 640, 640))
+            'image': torch.randn((3, 640, 640)),
+            'instances': target
         }
     ]
+
     model(batched_inputs)
+
+    summary(model.head, input_data=[[
+        torch.randn((1, 256, 40, 40)),
+        torch.randn((1, 256, 20, 20)),
+        torch.randn((1, 256, 10, 10)),
+        torch.randn((1, 256, 5, 5)),
+
+    ]])
+
     # outputs p3, p4, p5, p6, p7 with different shapes
-    print(model)
+    # print(model)
    
 
 

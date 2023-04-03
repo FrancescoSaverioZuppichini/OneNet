@@ -117,6 +117,7 @@ class OneNet(nn.Module):
             feature = src[f]
             features.append(feature)
 
+        [print(f.shape) for f in features]
         # Cls & Reg Prediction.
         outputs_class, outputs_coord, anchors, locations, fpn_levels = self.head(features)    
             

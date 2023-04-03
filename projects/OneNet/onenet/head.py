@@ -142,6 +142,7 @@ class FCOSHead(nn.Module):
 
     def apply_ltrb(self, locations, pred_ltrb):
         """
+        here we are rescaling the grid by pred_ltrb
         :param locations:  (1, 2, H, W)
         :param pred_ltrb:  (N, 4, H, W)
         """
@@ -157,6 +158,8 @@ class FCOSHead(nn.Module):
     @torch.no_grad()
     def locations(self, features, stride):
         """
+        This code essentially computes the (x, y) coordinates of the center points of evenly spaced cells in a grid, given the height and width of the grid and the stride between the cells.
+
         Arguments:
             features:  (N, C, H, W)
         Return:
@@ -165,7 +168,8 @@ class FCOSHead(nn.Module):
 
         h, w = features.size()[-2:]
         device = features.device
-
+        # if stride is 8
+        # [0, 8, 16, 24 ...]
         shifts_x = torch.arange(
             0, w * stride, step=stride,
             dtype=torch.float32, device=device
